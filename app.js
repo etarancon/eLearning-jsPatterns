@@ -1,33 +1,69 @@
-//Vars
-let clickCountImg1 = 0;
-let clickCountImg2 = 0;
-
-const containerImg1 = document.getElementById('img-1');
-const containerImg2 = document.getElementById('img-2');
-const header1 = containerImg1.getElementsByClassName('header')[0];
-const header2 = containerImg2.getElementsByClassName('header')[0];
-
-
-//Events
-containerImg1.addEventListener('click', function () {
-    clickCountImg1++;
-    console.log(clickCountImg1);
-    _addText(header1, clickCountImg1);
-}, false);
-containerImg2.addEventListener('click', function () {
-    clickCountImg2++;
-    console.log(clickCountImg2);
-    _addText(header2, clickCountImg2);
-}, false);
-
-//Functions
-function _addText(container = '', count = '') {
-    let textContainer = container.getElementsByTagName('p')[0];
-    if (!textContainer) {
-        const element = document.createElement('p');
-        container.appendChild(element);
-        textContainer = container.getElementsByTagName('p')[0];
+document.onreadystatechange = function () {
+    if (document.readyState === "interactive" || document.readyState === "complete") {
+        initApplication();
     }
+}
 
-    textContainer.innerText=count;
+function initApplication() {
+    //Vars
+    const URL = 'cats.json';
+    let catsList = [];
+    const listContainer = document.getElementById('list-container');
+
+    //Get list of cats to show in index
+    _generateList(URL).then((response) => {
+        catsList = response.cats;
+
+        catsList.forEach(data => {
+            //Crear los elementos en el DOM
+            let node = _createNode(data);
+            //Añadir event
+            node.addEventListener('click', function (target) {
+                _addClick(target.currentTarget, catsList);
+            });
+            //Pintar
+            listContainer.appendChild(node);
+        });
+    });
+}
+
+//Private  Functions
+function _getData(url) {
+    return fetch(url, {
+        method: 'get'
+    });
+}
+
+function _generateList(url) {
+    return _getData(url).then((response) => {
+        return response.json();
+    });
+}
+
+function _createNode(data) {
+    let node = document.createElement('li');
+    node.setAttribute('data-id', data.id);
+    node.className = 'list-item';
+    node.innerHTML = `${data.catName} <img src="${data.catImage}"/><span>${data.catCount}</span>`;
+
+    return node;
+}
+
+function _findById(id, list) {
+    return list.find(function (obj) {
+        if (obj.id && obj.id === id) {
+            return true;
+        }
+    });
+}
+
+function _addClick(target, catsList) {
+    const id = parseInt(target.getAttribute('data-id'));
+    const cat = _findById(id, catsList);
+    if (cat) {
+        cat.catCount++;
+    }
+    const span = target.getElementsByTagName('span')[0];
+    span.innerText = cat.catCount;
+
 }

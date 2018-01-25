@@ -6,16 +6,16 @@ html {
     padding:0;
     box-sizing: border-box;
 }
-#img-container{
+.list-container{
     display: flex;
+    width: 100%;
+    padding: 0;
 }
-#img-container div{
-    width: 50%;
+.list-container .list-item{
+    width: 100%;
     padding:10px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;
+    flex-direction: column;
 }
-#img-container div img{
+.list-container .list-item img{
     max-width: 100%;
 }
