@@ -1,0 +1,22 @@
+{
+  "name": "cats-app",
+  "version": "1.0.0",
+  "description": "course javascript patterns",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etarancon/jsPatterns.git"
+  },
+  "keywords": [
+    "cats"
+  ],
+  "author": "etarancon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/etarancon/jsPatterns/issues"
+  },
+  "homepage": "https://github.com/etarancon/jsPatterns#readme",
+  "devDependencies": {}
+}

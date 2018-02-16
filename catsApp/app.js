@@ -1,92 +1,118 @@
 document.onreadystatechange = function () {
     if (document.readyState === "interactive" || document.readyState === "complete") {
-        initApplication();
-    }
-}
+        const URL = 'cats.json';
 
-function initApplication() {
-    //Vars
-    const URL = 'cats.json';
-    let catsList = [];
-    const listContainer = document.getElementById('list-container');
-    const detailContainer = document.getElementById('detail-container');
+        var model = {
+            list: []
+        };
 
-    //Get list of cats to show in index
-    _getData(URL).then((response) => {
-        catsList = response.cats;
+        var service = {
+            get: function (url) {
+                return fetch(url, {
+                    method: 'get'
+                });
+            },
 
-        catsList.forEach(data => {
-            //Crear los elementos en el DOM
-            let node = _createHtml(data, 'li');
-            //Añadir event
-            node.addEventListener('click', function (target) {
-                const selectedItem = _selectItem(target.currentTarget, catsList);
-
-                _showDetail(detailContainer, selectedItem);
-            });
-            //Pintar
-            listContainer.appendChild(node);
-        });
-    });
-}
-
-//Private  Functions
-function _get(url) {
-    return fetch(url, {
-        method: 'get'
-    });
-}
-
-function _getData(url) {
-    return _get(url).then((response) => {
-        return response.json();
-    });
-}
-
-function _findById(id, list) {
-    return new Promise(function (resolve, reject) {
-        const item = list.find(function (obj) {
-            if (obj.id && obj.id === id) {
-                return true;
+            getData: function (url) {
+                return this.get(url).then((response) => {
+                    return response.json();
+                });
             }
+        };
+
+        var view = {
+            init: function () {
+                this.listContainer = document.getElementById('list-container');
+                this.detailContainer = document.getElementById('detail-container');
+
+                this.renderList();
+            },
+
+            renderList: function () {
+                const self = this;
+                const listContainer = this.listContainer;
+                const detailContainer = this.detailContainer;
+
+                controller.getModel().then(function (data) {
+                    data.forEach(item => {
+                        //Crear los elementos en el DOM
+                        let node = _createHtml(item, 'li');
+                        //Pintar
+                        listContainer.appendChild(node);
+                        //Añadir event
+                        node.addEventListener('click', function (target) {
+                            const currentTarget = target.currentTarget;
+
+                            controller.selectItem(currentTarget).then(function(item){
+                                const span = currentTarget.getElementsByTagName('span')[0];
+                                span.innerText = item.catCount;
+
+                                self.renderDetail(item);
+                            });
+                        });
+                    });
+                });
+            },
+
+            renderDetail: function(detail){
+                const container = this.detailContainer;
+                const element = _createHtml(detail, 'div');
+
+                if (!container) {
+                    container = document.getElementsByTagName('body')[0];
+                }
+                const child = container.getElementsByTagName('div')[0];
+
+                if (child) {
+                    container.removeChild(child);
+                }
+
+                container.appendChild(element);
+            }
+        };
+
+        var controller = {
+            getModel: function () {
+                return service.getData(URL).then((data) => {
+                    model.list = data.cats;
+                    return model.list;
+                });
+            },
+            selectItem: function(target){
+                const id = parseInt(target.getAttribute('data-id'));
+
+                return _findById(id, model.list).then((item) => {
+                    if (item) {
+                        item.catCount++;
+        
+                        return item;
+                    }
+                });
+            }
+
+        };
+
+        view.init();
+    }
+    //Private  Functions
+
+    function _findById(id, list) {
+        return new Promise((resolve, reject) => {
+            const item = list.find(function (obj) {
+                if (obj.id && obj.id === id) {
+                    return true;
+                }
+            });
+            resolve(item);
         });
-        resolve(item);
-    });
-}
-
-function _createHtml(data, tagElement = 'div') {
-    let node = document.createElement(tagElement);
-    node.setAttribute('data-id', data.id);
-    node.className = 'list-item';
-    node.innerHTML = `<h2>${data.catName}</h2> <img src="${data.catImage}"/><span>${data.catCount}</span>`;
-
-    return node;
-}
-
-function _showDetail(container, detail = {}) {
-    if (!container) {
-        container = document.getElementsByTagName('body')[0];
     }
-    const element = _createHtml(detail, 'div');
-    
-    const child = container.getElementsByTagName('div')[0];
-    if(child){
-        container.removeChild(child);
+
+    function _createHtml(data, tagElement = 'div') {
+        let node = document.createElement(tagElement);
+        node.setAttribute('data-id', data.id);
+        node.className = 'list-item';
+        node.innerHTML = `<h2>${data.catName}</h2> <img src="${data.catImage}"/><span>${data.catCount}</span>`;
+
+        return node;
     }
-    container.appendChild(element);
-}
-
-function _selectItem(target, list) {
-    const id = parseInt(target.getAttribute('data-id'));
-    _findById(id, list).then(item => {
-        if (item) {
-            const span = target.getElementsByTagName('span')[0];
-
-            item.catCount++;
-            span.innerText = item.catCount;
-
-            return item;
-        }
-    });
-
 }
