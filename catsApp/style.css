@@ -17,9 +17,13 @@ html {
 
 .list-container .list-item {
     width: 100%;
-    padding: 30px;
+    padding: 10px;
     position: relative;
     box-sizing: border-box;
+}
+
+.list-container .list-item h2 {
+    margin: 0;
 }
 
 .list-container .list-item img,
